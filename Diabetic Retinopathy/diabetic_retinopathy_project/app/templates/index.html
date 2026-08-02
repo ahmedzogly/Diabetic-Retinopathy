@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>كشف اعتلال الشبكية السكري | DR AI</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">👁️</div>
+                <div>
+                    <h1>DR Detection AI</h1>
+                    <p class="subtitle">كشف اعتلال الشبكية السكري بالذكاء الاصطناعي</p>
+                </div>
+            </div>
+            <div class="nav">
+                <a href="#demo" class="nav-link">تجربة فورية</a>
+                <a href="#about" class="nav-link">عن المشروع</a>
+                <a href="/health" target="_blank" class="nav-link">الحالة</a>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <div class="badge">مصر • 2026</div>
+                <h2>اكتشف اعتلال الشبكية السكري في ثوانٍ</h2>
+                <p class="hero-text">
+                    نظام ذكاء اصطناعي متقدم يستخدم <strong>EfficientNet-B3</strong> لتصنيف صور قاع العين استناداً إلى نتائج تحقق حقيقية (QWK: 0.83).
+                </p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <div class="stat-number">54%</div>
+                        <div class="stat-label">الحساسية (Sensitivity)</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">0.83</div>
+                        <div class="stat-label">معامل QWK</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">68%</div>
+                        <div class="stat-label">الدقة (Accuracy)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Upload Section -->
+        <section class="upload-section" id="demo">
+            <div class="card">
+                <div class="card-header">
+                    <h3>🔬 ارفع صورة قاع العين</h3>
+                    <p>قم برفع صورة قاع العين (Fundus Image). يدعم PNG و JPG.</p>
+                </div>
+                
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-content">
+                        <div class="upload-icon">📤</div>
+                        <p class="upload-text">اسحب الصورة هنا أو اضغط للاختيار</p>
+                        <input type="file" id="file-input" accept="image/*" hidden>
+                        <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">
+                            اختر صورة
+                        </button>
+                        <p class="hint">الحد الأقصى: 10 ميجا • الصورة يجب أن تكون واضحة</p>
+                    </div>
+                </div>
+
+                <!-- Preview -->
+                <div id="preview-container" class="preview-container hidden">
+                    <div class="preview-wrapper">
+                        <img id="preview-image" alt="Preview">
+                        <button class="remove-btn" onclick="clearUpload()">×</button>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="runPrediction(false)">
+                            🔍 تحليل الصورة
+                        </button>
+                        <button class="btn btn-secondary" onclick="runPrediction(true)">
+                            🔍 + تفسير (Grad-CAM)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div id="results-container" class="results-container hidden">
+                    <h4>نتائج التحليل</h4>
+                    
+                    <div class="result-main">
+                        <div class="result-label">
+                            <span class="label-ar">الدرجة</span>
+                            <span class="label-en">Diagnosis</span>
+                        </div>
+                        <div id="predicted-class" class="predicted-class"></div>
+                        <div id="severity-badge" class="severity-badge"></div>
+                    </div>
+
+                    <div class="confidence-bar">
+                        <div class="confidence-label">
+                            <span>الثقة</span>
+                            <span id="confidence-value">92%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="confidence-fill" class="progress-fill" style="width: 92%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Probabilities -->
+                    <div class="probs-section">
+                        <h5>احتمالات الفئات</h5>
+                        <div id="probabilities"></div>
+                    </div>
+
+                    <!-- Recommendation -->
+                    <div class="recommendation-box">
+                        <div class="rec-header">📋 التوصية الطبية</div>
+                        <div id="recommendation-text"></div>
+                        <div id="recommendation-text-ar" class="rec-ar"></div>
+                    </div>
+
+                    <!-- Glaucoma Screening -->
+                    <div id="glaucoma-section" class="glaucoma-section hidden" style="margin-top: 15px; background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <h5 style="margin: 0 0 10px 0; color: #1e293b;">👁️ فحص الجلوكوما السريع (Glaucoma Screening)</h5>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-size: 0.9rem; color: #64748b;">نسبة التكهف البصري (vCDR)</div>
+                                <div style="font-size: 1.4rem; font-weight: bold; color: #0f172a;" id="cdr-value">-</div>
+                            </div>
+                            <div style="text-align: left;">
+                                <div style="font-size: 0.9rem; color: #64748b;">مستوى الخطر</div>
+                                <div id="glaucoma-risk-badge" class="severity-badge" style="margin-top: 5px;">طبيعي</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grad-CAM -->
+                    <div id="explain-section" class="explain-section hidden">
+                        <h5>🔎 تفسير النموذج (Grad-CAM)</h5>
+                        <div class="explain-content">
+                            <div class="explain-image-wrapper">
+                                <img id="gradcam-image" alt="Grad-CAM Overlay">
+                            </div>
+                            <div class="explain-text">
+                                <p id="interpretation-en"></p>
+                                <p id="interpretation-ar" class="ar"></p>
+                                <div class="explain-note">
+                                    المناطق الحمراء تشير إلى الأماكن التي ركز عليها النموذج.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-actions">
+                        <button class="btn btn-outline" onclick="downloadReport()">📥 تحميل التقرير</button>
+                        <button class="btn btn-outline" onclick="resetUI()">تحليل صورة جديدة</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Samples -->
+        <section class="demo-samples">
+            <h3>🧪 عينات تجريبية</h3>
+            <p class="section-subtitle">اضغط على أي صورة لتجربتها مباشرة</p>
+            <div class="samples-grid" id="samples-grid">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="about-section" id="about">
+            <div class="card">
+                <h3>عن المشروع</h3>
+                <div class="about-grid">
+                    <div>
+                        <h4>التقنية</h4>
+                        <ul>
+                            <li>EfficientNet-B3 + Transfer Learning</li>
+                            <li>APTOS 2019 Dataset (3,662 صورة)</li>
+                            <li>Grad-CAM للتفسيرية و OpenCV للجلوكوما</li>
+                            <li>دقة تحقق (QWK) تصل إلى 0.83</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>الأهمية في مصر</h4>
+                        <ul>
+                            <li>مصر من أعلى دول العالم في انتشار السكري</li>
+                            <li>~3.2 - 4.6 مليون مصاب باعتلال الشبكية</li>
+                            <li>نقص أطباء العيون في الريف</li>
+                            <li>حل مفتوح المصدر ومنخفض التكلفة</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>مشروع مفتوح المصدر • مبني لخدمة الصحة العامة في مصر والعالم العربي</p>
+            <p>2026 • Arena.ai Agent</p>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment Variables
+.env
+
+# Raw Datasets and Results
+data/
+results/
+*.csv
+*.zip
+
+# Demo and Testing Files
+app/static/demo_images/
+scripts/run_demo_pipeline.py
+scripts/setup_demo_images.py
+scripts/test_model.py
+
+# Exclude all models except the production best_model.pth
+models/*
+!models/best_model.pth
+
+# Logs
+logs/
+*.log
+
+# Pytest
+.pytest_cache/
