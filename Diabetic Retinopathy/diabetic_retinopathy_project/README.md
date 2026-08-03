@@ -100,10 +100,11 @@ diabetic_retinopathy_project/
 This system was developed as a graduation project under the honorable supervision of **Dr. Mohamed Elhadad**.
 
 **Development Team:**
+*   **Ahmed Shehta Zoghli**
 *   **Eslam Tag Elser**
 *   **Mohamed Hassan Ahmed**
 *   **Osama Mohamed Kamel**
 *   **Ahmed Zain Elabiden**
-*   **Ahmed Shehta Zoghli**
+
 
 > *"Dedicated to improving accessible healthcare technology through open-source artificial intelligence."*
