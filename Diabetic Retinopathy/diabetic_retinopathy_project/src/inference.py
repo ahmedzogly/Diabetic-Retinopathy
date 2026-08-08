@@ -7,12 +7,16 @@ import torch.nn.functional as F
 from PIL import Image
 import numpy as np
 import os
+import sys
 from typing import Dict, Union, Optional
 import logging
 
 from .classifier_model import load_model, create_model
 from .data_loader import DR_CLASSES, CLASS_NAMES_AR
 from .explain import ModelExplainer
+from .cdr_dl_calculator import DeepCDRCalculator
+import io
+import base64
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +42,10 @@ class DRInference:
             self.model.eval()
         
         self.explainer = ModelExplainer(self.model, device=self.device)
+        
+        # Load Deep CDR Calculator (U-Net)
+        unet_path = os.path.join(os.path.dirname(__file__), "..", "models", "best_unet_glaucoma.pth")
+        self.cdr_calculator = DeepCDRCalculator(model_path=unet_path, device=self.device)
         
         # ImageNet normalization
         self.mean = [0.485, 0.456, 0.406]
@@ -80,7 +88,7 @@ class DRInference:
             predicted_class = int(np.argmax(probabilities))
             confidence = float(probabilities[predicted_class])
         
-        # Calculate Glaucoma Risk (CDR)
+        # Calculate Glaucoma Risk (CDR) using U-Net
         if isinstance(image, str):
             pil_image = Image.open(image).convert('RGB')
         elif isinstance(image, np.ndarray):
@@ -88,8 +96,23 @@ class DRInference:
         else:
             pil_image = image
             
-        from .cdr_calculator import estimate_cdr
-        cdr_result = estimate_cdr(np.array(pil_image))
+        import cv2
+        img_bgr = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
+            
+        vcdr, pred_mask = self.cdr_calculator.calculate_vcdr(img_bgr)
+        
+        # Colorize the mask: 0=Black, 1=Blue (Disc), 2=Green (Cup)
+        colored_mask = np.zeros((*pred_mask.shape, 3), dtype=np.uint8)
+        colored_mask[pred_mask == 1] = [0, 0, 255] # Blue for Disc Rim
+        colored_mask[pred_mask == 2] = [0, 255, 0] # Green for Cup
+        
+        # Convert to Base64
+        mask_pil = Image.fromarray(colored_mask)
+        buffer = io.BytesIO()
+        mask_pil.save(buffer, format="PNG")
+        cdr_mask_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+        
+        is_high_risk = vcdr > 0.65
         
         result = {
             "predicted_class": predicted_class,
@@ -101,9 +124,10 @@ class DRInference:
             },
             "class_names": DR_CLASSES,
             "class_names_ar": CLASS_NAMES_AR,
-            "cdr_value": cdr_result.get("vCDR", cdr_result.get("v_cdr", 0.35)),
-            "glaucoma_risk": "High Risk" if cdr_result["high_risk"] else "Normal",
-            "glaucoma_risk_ar": "عالي الخطورة" if cdr_result["high_risk"] else "طبيعي"
+            "cdr_value": vcdr,
+            "cdr_mask_base64": cdr_mask_base64,
+            "glaucoma_risk": "High Risk" if is_high_risk else "Normal",
+            "glaucoma_risk_ar": "عالي الخطورة" if is_high_risk else "طبيعي"
         }
         
         # Add severity level

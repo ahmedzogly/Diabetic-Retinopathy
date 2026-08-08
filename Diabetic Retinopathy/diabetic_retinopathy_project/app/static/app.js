@@ -83,6 +83,9 @@ function handleFile(file) {
         
         // Hide any previous results
         document.getElementById('results-container').classList.add('hidden');
+        
+        // Auto-run prediction with explanation
+        runPrediction(true);
     };
     reader.readAsDataURL(file);
 }
@@ -220,6 +223,14 @@ function displayResults(data, withExplain) {
             riskBadge.style.color = '#22c55e';
             glaucomaSection.style.borderLeftColor = '#22c55e';
         }
+        // Handle Mask Image
+        const maskContainer = document.getElementById('cdr-mask-container');
+        if (data.cdr_mask_base64) {
+            maskContainer.classList.remove('hidden');
+            document.getElementById('cdr-mask-image').src = `data:image/png;base64,${data.cdr_mask_base64}`;
+        } else {
+            maskContainer.classList.add('hidden');
+        }
     } else {
         glaucomaSection.classList.add('hidden');
     }
@@ -269,7 +280,8 @@ function simulateResult(withExplain = false) {
             en: "Model highlighted areas of concern in the retina.",
             ar: "أبرز النموذج مناطق القلق في الشبكية."
         },
-        cdr_value: 0.45 + Math.random() * 0.3
+        cdr_value: 0.45 + Math.random() * 0.3,
+        cdr_mask_base64: null // Cannot easily simulate a dummy mask dynamically
     };
     
     simulated.glaucoma_risk = simulated.cdr_value > 0.65 ? "High Risk" : "Normal";
@@ -291,25 +303,173 @@ function simulateResult(withExplain = false) {
     document.getElementById('results-container').appendChild(note);
 }
 
+function getBase64Image(imgElement) {
+    if (!imgElement || !imgElement.src) return '';
+    if (imgElement.src.startsWith('data:')) return imgElement.src;
+    
+    try {
+        const canvas = document.createElement('canvas');
+        canvas.width = imgElement.naturalWidth || imgElement.width || 256;
+        canvas.height = imgElement.naturalHeight || imgElement.height || 256;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(imgElement, 0, 0);
+        return canvas.toDataURL('image/png');
+    } catch (e) {
+        console.error('Error converting image to base64:', e);
+        return imgElement.src;
+    }
+}
+
 function downloadReport() {
-    if (!currentResult) return;
-    
-    const reportData = {
-        ...currentResult,
-        timestamp: new Date().toISOString(),
-        model: "EfficientNet-B3 DR Detection v1.0"
+    // ============================================================
+    // NUCLEAR OPTION: Abandon html2canvas entirely.
+    // Use browser's native rendering via window.print() in a
+    // new window. This ALWAYS works — Arabic, images, everything.
+    // ============================================================
+
+    // 1. Collect data
+    const previewImg = document.getElementById('preview-image');
+    const gradcamImg = document.getElementById('gradcam-image');
+    const unetImg = document.getElementById('cdr-mask-image');
+
+    const img1 = getBase64Image(previewImg);
+    const img2 = getBase64Image(gradcamImg);
+    const img3 = getBase64Image(unetImg);
+
+    const drResult = document.getElementById('predicted-class') 
+        ? document.getElementById('predicted-class').innerText.trim() : 'N/A';
+    const drConfidence = document.getElementById('confidence-value') 
+        ? document.getElementById('confidence-value').innerText.trim() : 'N/A';
+    const vcdrEl = document.getElementById('cdr-value') || document.getElementById('vcdr-value');
+    const vcdrValue = vcdrEl ? vcdrEl.innerText.trim() : 'N/A';
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('ar-EG');
+    const timeStr = now.toLocaleTimeString('ar-EG');
+
+    // 2. Build a COMPLETE standalone HTML page
+    const fullHTML = `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تقرير فحص شبكية العين</title>
+    <style>
+        @media print {
+            body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .no-print { display: none !important; }
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            color: #333;
+            background: #fff;
+            direction: rtl;
+            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #0056b3;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+        .header h1 { color: #0056b3; font-size: 22px; margin-bottom: 8px; }
+        .header p { color: #666; font-size: 13px; }
+        .images-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        .images-table td { width: 33%; text-align: center; vertical-align: top; padding: 8px; }
+        .images-table img { width: 200px; height: 200px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+        .img-title { font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #333; }
+        .img-subtitle { font-size: 11px; color: #777; margin-bottom: 8px; }
+        .result-box {
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .result-box.dr { background-color: #f8f9fa; border-right: 5px solid #d9534f; }
+        .result-box.gl { background-color: #eef1f5; border-right: 5px solid #0275d8; }
+        .result-box h2 { font-size: 17px; margin-bottom: 12px; }
+        .result-box.dr h2 { color: #d9534f; }
+        .result-box.gl h2 { color: #0275d8; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table td { padding: 8px 5px; font-size: 15px; }
+        .data-table .label { font-weight: bold; width: 40%; }
+        .footer { margin-top: 40px; text-align: center; font-size: 11px; color: #aaa; border-top: 1px solid #eee; padding-top: 15px; }
+        .print-btn-container { text-align: center; margin: 20px 0; }
+        .print-btn {
+            background: #0056b3; color: #fff; border: none; padding: 12px 40px;
+            font-size: 16px; border-radius: 8px; cursor: pointer; font-family: inherit;
+        }
+        .print-btn:hover { background: #003d82; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>تقرير فحص شبكية العين بالذكاء الاصطناعي</h1>
+        <p>تاريخ الفحص: ${dateStr} - ${timeStr}</p>
+    </div>
+
+    <table class="images-table">
+        <tr>
+            <td>
+                <div class="img-title">الصورة الأصلية</div>
+                <img src="${img1}" />
+            </td>
+            <td>
+                <div class="img-title">تشخيص السكري</div>
+                <div class="img-subtitle">(Grad-CAM)</div>
+                <img src="${img2}" />
+            </td>
+            <td>
+                <div class="img-title">فحص المياه الزرقاء</div>
+                <div class="img-subtitle">(U-Net Mask)</div>
+                <img src="${img3}" style="background:#000;" />
+            </td>
+        </tr>
+    </table>
+
+    <div class="result-box dr">
+        <h2>نتائج اعتلال الشبكية السكري</h2>
+        <table class="data-table">
+            <tr><td class="label">النتيجة:</td><td>${drResult}</td></tr>
+            <tr><td class="label">نسبة ثقة النموذج:</td><td>${drConfidence}</td></tr>
+        </table>
+    </div>
+
+    <div class="result-box gl">
+        <h2>نتائج فحص الجلوكوما</h2>
+        <table class="data-table">
+            <tr><td class="label">نسبة التقعر للقرص (vCDR):</td><td>${vcdrValue}</td></tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p>هذا التقرير تم إنشاؤه آلياً بواسطة نظام Digilians</p>
+        <p>يجب مراجعة هذا التقرير من قبل طبيب مختص.</p>
+    </div>
+
+    <div class="print-btn-container no-print">
+        <button class="print-btn" onclick="window.print()">📥 طباعة / حفظ كـ PDF</button>
+        <p style="margin-top:10px; font-size:13px; color:#888;">اختر "Save as PDF" أو "حفظ كـ PDF" من نافذة الطباعة</p>
+    </div>
+</body>
+</html>`;
+
+    // 3. Open a new window and write the report into it
+    const reportWindow = window.open('', '_blank');
+    if (!reportWindow) {
+        alert('يرجى السماح بالنوافذ المنبثقة (Pop-ups) في المتصفح لتحميل التقرير.');
+        return;
+    }
+    reportWindow.document.write(fullHTML);
+    reportWindow.document.close();
+
+    // 4. Auto-trigger print after images load
+    reportWindow.onload = function() {
+        setTimeout(() => {
+            reportWindow.print();
+        }, 500);
     };
-    
-    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `dr_report_${Date.now()}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
 }
 
 function resetUI() {
@@ -320,6 +480,8 @@ function resetUI() {
     document.getElementById('explain-section').classList.add('hidden');
     const glaucomaSection = document.getElementById('glaucoma-section');
     if (glaucomaSection) glaucomaSection.classList.add('hidden');
+    const maskContainer = document.getElementById('cdr-mask-container');
+    if (maskContainer) maskContainer.classList.add('hidden');
     
     currentImageFile = null;
     currentResult = null;
@@ -354,69 +516,20 @@ function renderDemoSamples() {
 }
 
 async function simulateDemoSample(sample) {
-    // Show preview area with a placeholder image
-    const previewContainer = document.getElementById('preview-container');
-    const uploadArea = document.getElementById('upload-area');
-    const resultsContainer = document.getElementById('results-container');
-    
-    uploadArea.classList.add('hidden');
-    previewContainer.classList.remove('hidden');
-    resultsContainer.classList.add('hidden');
-    
-    // Use a placeholder image
-    const previewImg = document.getElementById('preview-image');
-    previewImg.src = `/static/demo_images/${sample.file}`;
-    
-    // Fetch the actual image to create a real File object
-    fetch(`/static/demo_images/${sample.file}`)
-        .then(res => res.blob())
-        .then(blob => {
-            currentImageFile = new File([blob], sample.file, { type: blob.type || 'image/png' });
-        })
-        .catch(e => {
-            console.error("Failed to load demo image blob", e);
-            currentImageFile = { name: sample.file, type: 'image/png' };
-        });
-    
-    // Show loading briefly
-    setTimeout(() => {
-        const simulated = {
-            predicted_class: sample.class,
-            predicted_label: ["No DR", "Mild", "Moderate", "Severe", "Proliferative DR"][sample.class],
-            predicted_label_ar: ["لا اعتلال", "خفيف", "متوسط", "شديد", "تكاثري"][sample.class],
-            confidence: 0.88 + (Math.random() * 0.1),
-            probabilities: {
-                "0": sample.class === 0 ? 0.92 : 0.03,
-                "1": sample.class === 1 ? 0.89 : 0.05,
-                "2": sample.class === 2 ? 0.91 : 0.04,
-                "3": sample.class === 3 ? 0.85 : 0.03,
-                "4": sample.class === 4 ? 0.87 : 0.02,
-            },
-            severity: ["Normal", "Mild", "Moderate", "Severe", "Proliferative"][sample.class],
-            severity_ar: ["طبيعي", "خفيف", "متوسط", "شديد", "تكاثري"][sample.class],
-            recommendation: "Routine follow-up recommended.",
-            recommendation_ar: "يُنصح بالمتابعة الدورية.",
-            interpretation: {
-                en: "The model focused on the retinal vessels and optic disc area.",
-                ar: "ركز النموذج على الأوعية الدموية في الشبكية والقرص البصري."
-            },
-            cdr_value: 0.55
-        };
-        simulated.glaucoma_risk = "Normal";
-        simulated.glaucoma_risk_ar = "طبيعي";
+    try {
+        // Show loading state if needed, but handleFile does this anyway
+        const response = await fetch(`/static/demo_images/${sample.file}`);
+        const blob = await response.blob();
         
-        currentResult = simulated;
-        displayResults(simulated, true);
+        // Convert the blob from the demo image into a real File object
+        const file = new File([blob], sample.file, { type: blob.type || 'image/png' });
         
-        // Simulate gradcam using a placeholder
-        const explainSection = document.getElementById('explain-section');
-        if (explainSection) {
-            explainSection.classList.remove('hidden');
-            document.getElementById('gradcam-image').src = previewImg.src;
-            document.getElementById('interpretation-en').innerHTML = `<strong>EN:</strong> ${simulated.interpretation.en}`;
-            document.getElementById('interpretation-ar').innerHTML = `<strong>AR:</strong> ${simulated.interpretation.ar}`;
-        }
-    }, 650);
+        // Pass it to the normal flow as if the user uploaded it
+        handleFile(file);
+    } catch (e) {
+        console.error("Failed to load demo image blob", e);
+        alert('فشل في تحميل عينة التجربة. يرجى التأكد من اتصال الشبكة.');
+    }
 }
 
 // Bonus: Allow pasting images from clipboard

@@ -31,22 +31,8 @@
                 <div class="badge">مصر • 2026</div>
                 <h2>اكتشف اعتلال الشبكية السكري في ثوانٍ</h2>
                 <p class="hero-text">
-                    نظام ذكاء اصطناعي متقدم يستخدم <strong>EfficientNet-B3</strong> لتصنيف صور قاع العين استناداً إلى نتائج تحقق حقيقية (QWK: 0.83).
+                    نظام ذكاء اصطناعي متقدم لتصنيف صور قاع العين.
                 </p>
-                <div class="hero-stats">
-                    <div class="stat">
-                        <div class="stat-number">54%</div>
-                        <div class="stat-label">الحساسية (Sensitivity)</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">0.83</div>
-                        <div class="stat-label">معامل QWK</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">68%</div>
-                        <div class="stat-label">الدقة (Accuracy)</div>
-                    </div>
-                </div>
             </div>
         </section>
 
@@ -126,14 +112,22 @@
                     <!-- Glaucoma Screening -->
                     <div id="glaucoma-section" class="glaucoma-section hidden" style="margin-top: 15px; background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6;">
                         <h5 style="margin: 0 0 10px 0; color: #1e293b;">👁️ فحص الجلوكوما السريع (Glaucoma Screening)</h5>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <div style="font-size: 0.9rem; color: #64748b;">نسبة التكهف البصري (vCDR)</div>
-                                <div style="font-size: 1.4rem; font-weight: bold; color: #0f172a;" id="cdr-value">-</div>
+                        <div style="display: flex; gap: 15px; align-items: flex-start;">
+                            <!-- Data -->
+                            <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div style="margin-bottom: 10px;">
+                                    <div style="font-size: 0.9rem; color: #64748b;">نسبة التكهف البصري (vCDR)</div>
+                                    <div style="font-size: 1.4rem; font-weight: bold; color: #0f172a;" id="cdr-value">-</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 0.9rem; color: #64748b;">مستوى الخطر</div>
+                                    <div id="glaucoma-risk-badge" class="severity-badge" style="margin-top: 5px;">طبيعي</div>
+                                </div>
                             </div>
-                            <div style="text-align: left;">
-                                <div style="font-size: 0.9rem; color: #64748b;">مستوى الخطر</div>
-                                <div id="glaucoma-risk-badge" class="severity-badge" style="margin-top: 5px;">طبيعي</div>
+                            <!-- Mask Image -->
+                            <div id="cdr-mask-container" class="hidden" style="flex-shrink: 0; text-align: center;">
+                                <img id="cdr-mask-image" alt="Segmentation Mask" style="width: 120px; height: 120px; border-radius: 6px; border: 1px solid #cbd5e1; object-fit: contain; background: #000;">
+                                <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">U-Net Mask</div>
                             </div>
                         </div>
                     </div>
@@ -180,10 +174,9 @@
                     <div>
                         <h4>التقنية</h4>
                         <ul>
-                            <li>EfficientNet-B3 + Transfer Learning</li>
-                            <li>APTOS 2019 Dataset (3,662 صورة)</li>
-                            <li>Grad-CAM للتفسيرية و OpenCV للجلوكوما</li>
-                            <li>دقة تحقق (QWK) تصل إلى 0.83</li>
+                            <li>Deep Learning Models</li>
+                            <li>Medical Image Processing</li>
+                            <li>Grad-CAM للتفسيرية و U-Net للجلوكوما</li>
                         </ul>
                     </div>
                     <div>
@@ -200,11 +193,10 @@
         </section>
 
         <footer>
-            <p>مشروع مفتوح المصدر • مبني لخدمة الصحة العامة في مصر والعالم العربي</p>
-            <p>2026 • Arena.ai Agent</p>
+            <p>مشروع مبني لخدمة الصحة العامة في مصر والعالم العربي</p>
+            <p>2026 • Digilians</p>
         </footer>
-    </div>
-
-    <script src="/static/app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="/static/app.js?v=23"></script>
 </body>
 </html>

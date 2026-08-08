@@ -96,6 +96,7 @@ class PredictionResponse(BaseModel):
     interpretation: Optional[dict] = None
     gradcam_available: bool = False
     cdr_value: Optional[float] = None
+    cdr_mask_base64: Optional[str] = None
     glaucoma_risk: Optional[str] = None
     glaucoma_risk_ar: Optional[str] = None
 
@@ -170,6 +171,7 @@ async def predict(file: UploadFile = File(...)):
             recommendation=result["recommendation"],
             recommendation_ar=result["recommendation_ar"],
             cdr_value=result.get("cdr_value"),
+            cdr_mask_base64=result.get("cdr_mask_base64"),
             glaucoma_risk=result.get("glaucoma_risk"),
             glaucoma_risk_ar=result.get("glaucoma_risk_ar")
         )
