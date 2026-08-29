@@ -4,6 +4,12 @@
   <p><i>A comprehensive, production-ready AI pipeline & web platform for automated fundus image screening</i></p>
   
   <p>
+    <a href="https://diabetic-retinopathy-model--ahmedzogly26.replit.app/dr-app/" target="_blank">
+      <img src="https://img.shields.io/badge/🚀_Live_Demo-جرب_النموذج_أونلاين_الآن-2ea44f?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Live Demo">
+    </a>
+  </p>
+  
+  <p>
     <img src="https://img.shields.io/badge/Python-3.10-blue.svg" alt="Python Version">
     <img src="https://img.shields.io/badge/PyTorch-2.0.1-EE4C2C.svg?logo=pytorch" alt="PyTorch">
     <img src="https://img.shields.io/badge/FastAPI-0.103.1-009688.svg?logo=fastapi" alt="FastAPI">
@@ -12,9 +18,20 @@
     <img src="https://img.shields.io/badge/Segmentation-U--Net-purple.svg" alt="U-Net">
     <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
   </p>
+
+  <p>
+    🔗 <b>رابط المنصة المباشرة (Cloud Live App):</b> <a href="https://diabetic-retinopathy-model--ahmedzogly26.replit.app/dr-app/">https://diabetic-retinopathy-model--ahmedzogly26.replit.app/dr-app/</a>
+  </p>
 </div>
 
 <br>
+
+---
+
+## 🌐 التجربة الحية على السحابة (Live Web Demo)
+
+يمكنك تجربة النظام مباشرة وفحص صور قاع العين واستخراج التقارير الطبية دون الحاجة إلى تثبيت أي برامج محلياً من خلال الرابط التالي:
+👉 **[اضغط هنا لفتح التطبيق السحابي المباشر (Cloud Live Demo)](https://diabetic-retinopathy-model--ahmedzogly26.replit.app/dr-app/)**
 
 ---
 
@@ -81,7 +98,7 @@
 
 يستعرض هذا القسم نماذج حقيقية لتقارير الفحص الصادرة من النظام لمختلف مراحل اعتلال الشبكية السكري وفحوصات الجلوكوما المصاحبة:
 
-| الدرجة (Stage) | تقرير الفحص الطبي الصادر (Generated Medical Report) | تفاصيل الحالة والمؤشرات الإكلينيكية (Clinical Details) |
+| المرحلة السريرية (Stage) | تقرير الفحص الطبي الصادر (Generated Medical Report) | تفاصيل الحالة والمؤشرات الإكلينيكية (Clinical Details) |
 |---|---|---|
 | **خفيف (Mild DR)** | <img src="docs/screenshots/report_case_mild.png" width="380" alt="تقرير اعتلال خفيف"> | <ul><li>**التشخيص:** اعتلال شبكية خفيف (Mild DR)</li><li>**مؤشر الجلوكوما:** vCDR = 0.70</li><li>**التفسيرية:** تركيز خريطة Grad-CAM على التغيرات الوعائية الدقيقة الأولية.</li></ul> |
 | **متوسط (Moderate DR)** | <img src="docs/screenshots/report_case_moderate.png" width="380" alt="تقرير اعتلال متوسط"> | <ul><li>**التشخيص:** اعتلال شبكية متوسط (Moderate DR)</li><li>**مؤشر الجلوكوما:** vCDR = 0.64</li><li>**التفسيرية:** رصد بؤر ارتشاح ونزيف شبكي متوسط الوضوح مع قناع U-Net.</li></ul> |
@@ -118,27 +135,28 @@
 
 ---
 
-## 🚀 التشغيل السريع (Quick Start with Docker)
+## 🚀 طرق التشغيل (Getting Started)
 
-أسرع وأسهل طريقة لتشغيل النظام بدون الحاجة لتثبيت أي بيئات عمل يدوياً:
+### 1. التجربة السحابية المباشرة (Online Cloud Demo - No Setup Required)
+أسرع طريقة لتجربة النظام مباشرة من أي جهاز أو هاتف ذكي:
+🔗 **[https://diabetic-retinopathy-model--ahmedzogly26.replit.app/dr-app/](https://diabetic-retinopathy-model--ahmedzogly26.replit.app/dr-app/)**
 
-**1. استنساخ المستودع (Clone Repo):**
+### 2. التشغيل السريع باستخدام دوكر (Quick Start with Docker)
 ```bash
+# 1. استنساخ المستودع (Clone Repo)
 git clone https://github.com/ahmedzogly/Diabetic-Retinopathy.git
 cd "Diabetic-Retinopathy/Diabetic Retinopathy/diabetic_retinopathy_project"
-```
 
-**2. بناء حاوية الدوكر (Build Docker Image):**
-```bash
+# 2. بناء حاوية الدوكر (Build Docker Image)
 docker build -t diabetic-retinopathy-api .
-```
 
-**3. تشغيل الحاوية (Run Container):**
-```bash
+# 3. تشغيل الحاوية (Run Container)
 docker run -d -p 8000:8000 --name dr-api diabetic-retinopathy-api
 ```
+🌐 التطبيق متاح محلياً عبر المتصفح: **[http://localhost:8000](http://localhost:8000)**
 
-🌐 التطبيق متاح ومباشر الآن عبر المتصفح: **[http://localhost:8000](http://localhost:8000)**
+### 3. التشغيل المحلي المباشر على ويندوز (Windows One-Click Run)
+ببساطة قم بالنقر المزدوج على ملف **`run_server.bat`** وسيقوم بتفعيل البيئة وفتح التطبيق في المتصفح تلقائياً.
 
 ---
 
