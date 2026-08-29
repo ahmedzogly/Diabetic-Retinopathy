@@ -160,11 +160,13 @@ Diabetic Retinopathy/
 تم تطوير هذا النظام كمشروع تخرج تحت الإشراف الكريم للدكتور:
 **Dr. Mohamed Elhadad** 👨‍🏫
 
+
 **فريق التطوير والبحث (Development Team):**
+* 👨‍💻 **Ahmed Shehta Zoghli**
 * 👨‍💻 **Eslam Tag Elser**
 * 👨‍💻 **Mohamed Hassan Ahmed**
 * 👨‍💻 **Osama Mohamed Kamel**
 * 👨‍💻 **Ahmed Zain Elabiden**
-* 👨‍💻 **Ahmed Shehta Zoghli**
+
 
 > *"مكرس لتطوير حلول رعاية صحية ذكية ومتاحة للجميع باستخدام الذكاء الاصطناعي مفتوح المصدر."*
