@@ -77,6 +77,18 @@
 
 ---
 
+## 📑 عينات من تقارير الفحص لمختلف درجات المرض (Clinical Case Reports across Stages)
+
+يستعرض هذا القسم نماذج حقيقية لتقارير الفحص الصادرة من النظام لمختلف مراحل اعتلال الشبكية السكري وفحوصات الجلوكوما المصاحبة:
+
+| الدرجة (Stage) | تقرير الفحص الطبي الصادر (Generated Medical Report) | تفاصيل الحالة والمؤشرات الإكلينيكية (Clinical Details) |
+|---|---|---|
+| **خفيف (Mild DR)** | <img src="docs/screenshots/report_case_mild.png" width="380" alt="تقرير اعتلال خفيف"> | <ul><li>**التشخيص:** اعتلال شبكية خفيف (Mild DR)</li><li>**مؤشر الجلوكوما:** vCDR = 0.70</li><li>**التفسيرية:** تركيز خريطة Grad-CAM على التغيرات الوعائية الدقيقة الأولية.</li></ul> |
+| **متوسط (Moderate DR)** | <img src="docs/screenshots/report_case_moderate.png" width="380" alt="تقرير اعتلال متوسط"> | <ul><li>**التشخيص:** اعتلال شبكية متوسط (Moderate DR)</li><li>**مؤشر الجلوكوما:** vCDR = 0.64</li><li>**التفسيرية:** رصد بؤر ارتشاح ونزيف شبكي متوسط الوضوح مع قناع U-Net.</li></ul> |
+| **تكاثري (Proliferative DR)** | <img src="docs/screenshots/report_case_proliferative.png" width="380" alt="تقرير اعتلال تكاثري"> | <ul><li>**التشخيص:** اعتلال تكاثري متقدم (Proliferative DR)</li><li>**مؤشر الجلوكوما:** vCDR = 1.00</li><li>**التفسيرية:** انتشار واسع للأوعية الدموية غير الطبيعية والارتشاحات الحادة عبر كامل الشبكية.</li></ul> |
+
+---
+
 ## ✨ المميزات الرئيسية (Key Features)
 
 * 🧠 **Deep Learning Diagnosis:** مبني على نموذج **EfficientNet-B3** مع Transfer Learning على بيانات APTOS العالمية. محققاً نتائج فائقة: **Quadratic Weighted Kappa (QWK): 0.88**، ودقة عامة متقدمة.
@@ -139,7 +151,7 @@ Diabetic Retinopathy/
 │   ├── templates/        # قوالب HTML (index.html)
 │   └── main.py           # خادم FastAPI ونقاط الـ API
 ├── docs/                 # التوثيق والصور المعمارية
-│   └── screenshots/      # لقطات شاشة واجهة النظام والتقارير
+│   └── screenshots/      # لقطات شاشة واجهة النظام ونماذج التقارير الطبية
 ├── src/                  # النماذج والمنطق الرياضي للذكاء الاصطناعي
 │   ├── classifier_model.py # معمارية EfficientNet-B3
 │   ├── explain.py        # محرك توليد خرائط Grad-CAM
@@ -160,13 +172,11 @@ Diabetic Retinopathy/
 تم تطوير هذا النظام كمشروع تخرج تحت الإشراف الكريم للدكتور:
 **Dr. Mohamed Elhadad** 👨‍🏫
 
-
 **فريق التطوير والبحث (Development Team):**
-* 👨‍💻 **Ahmed Shehta Zoghli**
 * 👨‍💻 **Eslam Tag Elser**
 * 👨‍💻 **Mohamed Hassan Ahmed**
 * 👨‍💻 **Osama Mohamed Kamel**
 * 👨‍💻 **Ahmed Zain Elabiden**
-
+* 👨‍💻 **Ahmed Shehta Zoghli**
 
 > *"مكرس لتطوير حلول رعاية صحية ذكية ومتاحة للجميع باستخدام الذكاء الاصطناعي مفتوح المصدر."*
